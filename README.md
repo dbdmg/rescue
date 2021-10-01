@@ -53,7 +53,7 @@ data
 
 
 ## Citation
-The paper is under revision. Any citation reference will appear here.
+The paper is under review. Citation reference will be provided here.
 
 ## Contacts
 
