@@ -1,0 +1,24 @@
+---
+UNet:
+  name: UNet
+  n_channels: 12
+  n_classes: 1
+  act: relu
+  
+SegNet:
+  name: SegNet
+  n_channels: 12
+  
+NestedUNet:
+  name: NestedUNet
+  output_type: 1
+  n_channels: 12
+  act: relu
+  
+AttentionUnet:
+  name: AttentionUnet
+  encoder_name: resnet34
+  encoder_weights: imagenet
+  classes: 1
+  n_channels: 12
+  att_layers: [1, 2, 3, 4]

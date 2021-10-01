@@ -1,0 +1,82 @@
+---
+num_workers: 0
+key: purple
+batch_size: 8
+n_channels: 12
+epochs: 50
+binary: True
+seed: 47
+patience: 5
+tol: 0.01
+fold_separation_csv: '../data/sentinel-hub/satellite_data.CSV'
+
+criterion: 
+  name: nn.BCEWithLogitsLoss
+  
+regr_criterion:
+  name: nn.MSELoss
+
+model:
+  name: UNet
+  n_channels: 12
+  n_classes: 1
+  act: relu
+
+optimizer:
+  name: optim.Adam
+  lr: 0.0001
+  weight_decay: 0
+    
+# scheduler_tuple= [optim.lr_scheduler.ReduceLROnPlateau, {'factor': 0.25, 'patience': 2}]
+
+# Input dataset
+dataset_specs:
+  folder: '../data/sentinel-hub'
+  mask_one_hot: False
+  height: 480
+  width: 480
+  product_list: ['sentinel2']
+  mode: 'post'
+  filter_validity_mask: True
+  process_dict:
+    sentinel2: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  activation_date_csv: '../data/geospatialdownloader/scripts/satellite_data.csv'
+  mask_filtering: False
+  only_burnt: True
+
+
+# Test set fold (key) -> validation fold (value)
+validation_dict:
+  blue: fucsia
+  brown: fucsia
+  fucsia: green
+  green: fucsia
+  orange: fucsia
+  red: fucsia
+  yellow: fucsia
+
+# Training callbacks
+trainer:
+ gpus: 1
+ log_every_n_steps: 1
+ progress_bar_refresh_rate: 1
+ benchmark: True
+ precision: 16
+ gradient_clip_val: 5.0
+ num_sanity_val_steps: 3
+ sync_batchnorm: True
+# distributed_backend="ddp",  # DistributedDataParallel
+# resume_from_checkpoint="cyst_checkpoints/prova1/epoch=20-step=8546.ckpt"
+
+earlystopping:
+  monitor: val_loss
+  min_delta: 0.001
+  patience: 5
+  verbose: True
+  mode: min
+  
+checkpoint:
+  monitor: val_loss
+  verbose: True
+  mode: min
+  save_top_k: 1

@@ -1,0 +1,47 @@
+---
+classification:
+  BCE:
+    name: nn.BCEWithLogitsLoss
+  Dice:
+    name: GDiceLossV2
+  sIoU:
+    name: FuzzyIoULoss
+  ComboBD:
+    name: ComboLoss
+    loss1: nn.BCEWithLogitsLoss
+    loss2: GDiceLossV2
+  ComboBS:
+    name: ComboLoss
+    loss1: nn.BCEWithLogitsLoss
+    loss2: FuzzyIoULoss
+    
+regression:
+  MSE:
+    name: nn.MSELoss
+  sIoU:
+    name: softIoULoss
+  F1MSE:
+    name: F1MSE
+    
+config_names:
+  BCE-MSE:
+    first: BCE
+    second: MSE
+  Dice-MSE: 
+    first: Dice
+    second: MSE
+  B+D-MSE:
+    first: ComboBD
+    second: MSE
+  B+S-MSE:
+    first: ComboBS
+    second: MSE
+  sIoU-sIoU:
+    first: sIoU
+    second: sIoU
+  sIoU-MSE:
+    first: sIoU
+    second: MSE
+  BCE-F1MSE:
+    first: BCE
+    second: F1MSE
