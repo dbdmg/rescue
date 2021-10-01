@@ -8,7 +8,7 @@ binary: True
 seed: 47
 patience: 5
 tol: 0.01
-fold_separation_csv: '../data/sentinel-hub/satellite_data.CSV'
+fold_separation_csv: '../satellite_data.CSV'
 
 criterion: 
   name: nn.BCEWithLogitsLoss
@@ -40,7 +40,7 @@ dataset_specs:
   filter_validity_mask: True
   process_dict:
     sentinel2: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-  activation_date_csv: '../data/geospatialdownloader/scripts/satellite_data.csv'
+  activation_date_csv: '../satellite_data.CSV'
   mask_filtering: False
   only_burnt: True
 

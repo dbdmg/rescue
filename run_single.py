@@ -5,6 +5,7 @@ from neural_net.utils import str2bool
 def get_args():
     parser = argparse.ArgumentParser(description='Training of the U-Net usign Pytorch Lightining framework.')
     parser.add_argument('--discard_images', nargs='?', default=False, const=True, help = "Prevent Wandb to save validation result for each step.")
+    parser.add_argument('--unlog_res', nargs='?', default=False, const=True, help = "Prevent Wandb Logger to start.")
     parser.add_argument('-k', '--key', type=str, default='purple', help = "Test set fold key. Default is 'blue'.")
     parser.add_argument('-m', '--model_name', type=str, default='unet', help = "Select the model (unet, canet or attnet available). Default is unet.")
     parser.add_argument('--losses', type=str, default=None, help = "Select the configuration name of the loss function(s). The name must be written in lower casses without special characters.")

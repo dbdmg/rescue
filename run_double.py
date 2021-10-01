@@ -49,7 +49,8 @@ def train(args):
         print(f"Simulation already done ({name})")
         return
         
-    run = wandb.init(reinit=True, project="rescue_paper", entity="smonaco", name=name, tags=["crossval_double"], settings=wandb.Settings(start_method='fork'))
+    if not args.unlog_res:
+        run = wandb.init(reinit=True, project="rescue_paper", entity="smonaco", name=name, tags=["crossval_double"], settings=wandb.Settings(start_method='fork'))
     
     print(f'Best checkpoints saved in "{outdir}"\n')
 
@@ -59,16 +60,19 @@ def train(args):
         hparams.trainer.gpus = 0
         hparams.trainer.precision = 32
         
-    logger = WandbLogger(save_dir=outdir, name=name)
-    logger.log_hyperparams(hparams)
-#     logger = None
+    if args.unlog_res:
+        logger = None
+    else:
+        logger = WandbLogger(save_dir=outdir, name=name)
+        logger.log_hyperparams(hparams)
+
     
     #### 1st network ###################
     if not any(outdir.glob("bin*best*")):
         earlystopping_1 = EarlyStopping(**hparams.earlystopping)
         checkpoint_1 = ModelCheckpoint(**hparams.checkpoint, filename='binary_model-{epoch}')
         
-        bin_model = Double_Satmodel(hparams, {'log_imgs': not args.discard_images, 'binary': True, 'log_res':True})
+        bin_model = Double_Satmodel(hparams, {'log_imgs': not args.discard_images, 'binary': True, 'log_res':not args.unlog_res})
 
         logger.watch(bin_model, log='all', log_freq=1)
         trainer = pl.Trainer(
@@ -97,7 +101,7 @@ def train(args):
 #             best = str(intermediate_chp)
             
         regr_model = Double_Satmodel.load_from_checkpoint(best,#checkpoint_1.best_model_path,
-                                                          opt={'log_imgs': not args.discard_images, 'binary': False, 'log_res':True}
+                                                          opt={'log_imgs': not args.discard_images, 'binary': False, 'log_res':not args.unlog_res}
                                                   )
         trainer = pl.Trainer(
             **hparams.trainer,
@@ -118,7 +122,8 @@ def train(args):
         regr_model = Double_Satmodel.load_from_checkpoint(str(next(outdir.glob("reg*best*"))), hparams=hparams)
         trainer = pl.Trainer(**hparams.trainer, logger=logger).test(regr_model)
     
-    wandb.finish()
+    if not args.unlog_res:
+        wandb.finish()
 
 if __name__ == '__main__':
     args = get_args()
