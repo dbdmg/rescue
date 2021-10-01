@@ -1,6 +1,6 @@
 # Attention to fires: multi-channel deep-learning models forwildfire severity prediction
 
-This repository provides the code of our submitted article "Attention to fires: multi-channel deep-learning models forwildfire severity prediction".
+This repository provides the code of the paper "Attention to fires: multi-channel deep-learning models forwildfire severity prediction" (under review).
 
 **Autors:** Monaco, S.; Greco, S.; Farasin, A.; Colomba, L.; Apiletti, D.; Garza, P.; Cerquitelli, T.; Baralis, E.
 
@@ -10,7 +10,7 @@ Wildfires are one of the natural hazards that the European Union is actively mon
 ## Architecture
 ![Double step Framework](http://dbdmg.polito.it/dbdmg_web/wp-content/uploads/2021/10/dsf.png)
 
-The Double-Step Framework splits the task between a first wildfire binary detection and a consequent severity prediction. Such a framework allows complete customization of both training loss functions and backbone neural networks.
+The Double-Step Framework splits the task between a first wildfire binary detection and a consequent severity prediction. Such a framework allows complete customization of both training loss functions and backbone deep-learning architectures.
 The main building blocks of the DSF can be summarized in the following:
  - Binary-class backbone
  - Binary loss
