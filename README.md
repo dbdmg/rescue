@@ -53,7 +53,20 @@ data
 
 
 ## Citation
-The paper is under review. Citation reference will be provided here.
+If you want to use this architecture, please cite our paper:
+ 
+```
+ @article{monaco2021attention,
+  title={Attention to Fires: Multi-Channel Deep Learning Models for Wildfire Severity Prediction},
+  author={Monaco, Simone and Greco, Salvatore and Farasin, Alessandro and Colomba, Luca and Apiletti, Daniele and Garza, Paolo and Cerquitelli, Tania and Baralis, Elena},
+  journal={Applied Sciences},
+  volume={11},
+  number={22},
+  pages={11060},
+  year={2021},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
+```
 
 ## Contacts
 
