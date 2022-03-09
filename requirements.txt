@@ -4,7 +4,7 @@ matplotlib == 3.1.2
 numpy == 1.19.2
 opencv_python == 4.5.1.48
 pandas == 1.1.2+1.g514aca06b1
-pytorch_lightning == 1.2.10
+pytorch_lightning == 1.6.0
 scikit_image == 0.17.2
 scipy == 1.5.2
 seaborn == 0.11.1
