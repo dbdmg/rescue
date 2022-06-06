@@ -1,6 +1,4 @@
 import os
-import argparse
-import ast
 from pathlib import Path
 import pickle
 import wandb
@@ -21,8 +19,6 @@ from run_single import get_args
 
 
 def train(args):
-
-    
     hparams = TrainingConfig(**vars(args))
 #                             , n_channels=24, mode='both')
 #                             , only_burnt=False)
@@ -49,8 +45,8 @@ def train(args):
         print(f"Simulation already done ({name})")
         return
         
-    if not args.unlog_res:
-        run = wandb.init(reinit=True, project="rescue_paper", entity="smonaco", name=name, tags=["crossval_double"], settings=wandb.Settings(start_method='fork'))
+    if args.wandb_usr:
+        run = wandb.init(reinit=True, project="rescue_paper", entity=args.wandb_usr, name=name, settings=wandb.Settings(start_method='fork'))
     
     print(f'Best checkpoints saved in "{outdir}"\n')
 
@@ -60,11 +56,11 @@ def train(args):
         hparams.trainer.gpus = 0
         hparams.trainer.precision = 32
         
-    if args.unlog_res:
-        logger = None
-    else:
+    if args.wandb_usr:
         logger = WandbLogger(save_dir=outdir, name=name)
         logger.log_hyperparams(hparams)
+    else:
+        logger = None
 
     
     #### 1st network ###################
@@ -73,8 +69,9 @@ def train(args):
         checkpoint_1 = ModelCheckpoint(**hparams.checkpoint, filename='binary_model-{epoch}')
         
         bin_model = Double_Satmodel(hparams, {'log_imgs': not args.discard_images, 'binary': True, 'log_res':not args.unlog_res})
-
-        logger.watch(bin_model, log='all', log_freq=1)
+        
+        if args.wandb_usr:
+            logger.watch(bin_model, log='all', log_freq=1)
         trainer = pl.Trainer(
             **hparams.trainer,
             max_epochs=hparams.epochs,
@@ -122,7 +119,7 @@ def train(args):
         regr_model = Double_Satmodel.load_from_checkpoint(str(next(outdir.glob("reg*best*"))), hparams=hparams)
         trainer = pl.Trainer(**hparams.trainer, logger=logger).test(regr_model)
     
-    if not args.unlog_res:
+    if args.wandb_usr:
         wandb.finish()
 
 if __name__ == '__main__':

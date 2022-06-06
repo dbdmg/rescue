@@ -5,7 +5,7 @@ from neural_net.utils import str2bool
 def get_args():
     parser = argparse.ArgumentParser(description='Training of the U-Net usign Pytorch Lightining framework.')
     parser.add_argument('--discard_images', nargs='?', default=False, const=True, help = "Prevent Wandb to save validation result for each step.")
-    parser.add_argument('--unlog_res', nargs='?', default=False, const=True, help = "Prevent Wandb Logger to start.")
+    parser.add_argument('--wandb_usr', type=str, default=None, help = "Name for wandb login. If None (default), wandb is not used")
     parser.add_argument('-k', '--key', type=str, default='purple', help = "Test set fold key. Default is 'blue'.")
     parser.add_argument('-m', '--model_name', type=str, default='unet', help = "Select the model (unet, canet or attnet available). Default is unet.")
     parser.add_argument('--losses', type=str, default=None, help = "Select the configuration name of the loss function(s). The name must be written in lower casses without special characters.")
@@ -59,7 +59,8 @@ def train(args):
         print(f"Simulation already done ({name})")
         return
     
-    run = wandb.init(reinit=True, project="rescue_paper", entity="smonaco", name=name, settings=wandb.Settings(start_method='fork'))
+    if args.wandb_usr:
+        run = wandb.init(reinit=True, project="rescue_paper", entity=args.wandb_usr, name=name, settings=wandb.Settings(start_method='fork'))
     
     print(f'Best checkpoints saved in "{outdir}"')
 
@@ -69,10 +70,13 @@ def train(args):
     hparams["checkpoint"]["dirpath"] = outdir
     checkpoint_callback = ModelCheckpoint(**hparams.checkpoint)
     
-    logger = WandbLogger(save_dir=outdir, name=name)
-    logger.log_hyperparams(hparams)
-    logger.watch(pl_model, log='all', log_freq=1)
-    
+    if args.wandb_usr:
+        logger = WandbLogger(save_dir=outdir, name=name) if args.wandb_usr else None
+        logger.log_hyperparams(hparams)
+        logger.watch(pl_model, log='all', log_freq=1)
+    else:
+        logger = None
+        
     trainer = pl.Trainer(
         **hparams.trainer,
         max_epochs=hparams.epochs,
@@ -84,9 +88,8 @@ def train(args):
     )
     get_lr = False
     
-    trainer.tune(pl_model)
-    
     if get_lr:
+        trainer.tune(pl_model)
         lr_finder = trainer.tuner.lr_find(pl_model, 
                             min_lr=0.00005, 
                             max_lr=0.001,
@@ -101,9 +104,10 @@ def train(args):
 
     trainer.fit(pl_model)
     
-    best = Path(checkpoint_callback.best_model_path)
-    best.rename(best.parent / f'{wandb.run.name}-best{best.suffix}')
-    wandb.finish()
+    if wandb.run is not None:
+        best = Path(checkpoint_callback.best_model_path)
+        best.rename(best.parent / f'{wandb.run.name}-best{best.suffix}')
+        wandb.finish()
 
 if __name__ == '__main__':
     args = get_args()

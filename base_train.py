@@ -43,7 +43,7 @@ class Satmodel(pl.LightningModule):
         for key in ["binary", "log_imgs", "log_res"]:
             setattr(self, key, opt.get(key, True))
             
-        self.hparams = hparams
+        self.hparams.update(hparams)
         
         if not "SLURM_JOB_ID" in os.environ:
             hparams.num_workers = 0
@@ -169,16 +169,16 @@ class Satmodel(pl.LightningModule):
         logits = self.forward(images)
         loss = self.criterion(logits, masks)
         
-        if self.binary:
-            if self.log_res: self.log('train_iou', binary_mean_iou(logits, masks))
-        else:
-            sq_err, counters = compute_squared_errors(logits, masks, len(self.hparams.dataset_specs.mask_intervals))
-            mse = np.true_divide(sq_err, counters, np.full(sq_err.shape, np.nan), where=counters != 0)
-            if self.log_res: self.log('train_rmse', np.sqrt(mse[-1]))
-        
+        if wandb.run is not None:
+            if self.binary:
+                self.log('train_iou', binary_mean_iou(logits, masks))
+            else:
+                sq_err, counters = compute_squared_errors(logits, masks, len(self.hparams.dataset_specs.mask_intervals))
+                mse = np.true_divide(sq_err, counters, np.full(sq_err.shape, np.nan), where=counters != 0)
+                self.log('train_rmse', np.sqrt(mse[-1]))
 
-        if self.log_res: self.log('lr', self._get_current_lr())
-        if self.log_res: self.log('loss', loss)
+            self.log('lr', self._get_current_lr())
+            self.log('loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -193,13 +193,15 @@ class Satmodel(pl.LightningModule):
         
         if self.binary:
             val_kpi = binary_mean_iou(logits, masks)
-            if self.log_res: self.log('val_iou', val_kpi)
+            if wandb.run is not None:
+                self.log('val_iou', val_kpi)
         else:
             sq_err, counters = compute_squared_errors(logits, masks, len(self.hparams.dataset_specs.mask_intervals))
             mse = np.true_divide(sq_err, counters, np.full(sq_err.shape, np.nan), where=counters != 0)
             val_kpi = np.sqrt(mse[-1])
             
-            if self.log_res: self.log('val_rmse', val_kpi)
+            if wandb.run is not None:
+                if self.log_res: self.log('val_rmse', val_kpi)
             
         if self.log_imgs and self.log_res:
             self.log_images(images, logits, masks)
@@ -218,7 +220,7 @@ class Satmodel(pl.LightningModule):
             logits_ = logits.cpu().detach().numpy().astype("float")
             masks_ = masks.cpu().detach().numpy().astype("float")
 
-        if self.trainer.current_epoch % log_dist == 0:
+        if self.trainer.current_epoch % log_dist == 0 and wandb.run is not None:
             for i in range(images.shape[0]):
                 mask_img = wandb.Image(
                     images[i, [3,2,1], :, :]*2.5,

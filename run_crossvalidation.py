@@ -16,14 +16,16 @@ def main():
     args = get_args()
     for seed in [1,2,3]:
         for k in list(validation_dict.keys())[::-1]:
-            for model in ['unet', 'segnet', 'nestedunet', 'attentionunet']:
+#             for model in ['unet', 'segnet', 'nestedunet', 'attentionunet']:
+            for model in ['attentionunet']:
+
                 args.model_name = model
                 args.seed = seed
                 args.key = k
                 args.losses = losses[ls] if ls is not None else None
-                print(f'>> run_double {" ".join([f"--{k}={v}" for k, v in vars(args).items()])}\n')
-                double_train(args)
-#                 single_train(args)
+                print(f'>> run_single {" ".join([f"--{k}={v}" for k, v in vars(args).items()])}\n')
+#                 double_train(args)
+                single_train(args)
                 print("\n\n\n")
           
 if __name__ == '__main__':
