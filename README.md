@@ -1,7 +1,5 @@
 # Attention to fires: multi-channel deep-learning models forwildfire severity prediction
 
-This repository provides the code of the paper "Attention to fires: multi-channel deep-learning models forwildfire severity prediction" (under review).
-
 **Autors:** Monaco, S.; Greco, S.; Farasin, A.; Colomba, L.; Apiletti, D.; Garza, P.; Cerquitelli, T.; Baralis, E.
 
 ## Abstract
